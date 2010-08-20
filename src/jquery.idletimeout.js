@@ -17,18 +17,7 @@
 				this._startTimer();
 				
 				// start the idle timer
-				$.idleTimer(options.idleAfter * 1000);
-				
-				// once the user becomes idle
-				$(document).bind("idle.idleTimer", function(){
-					
-					// if the user is idle and a countdown isn't already running
-					if( $.data(document, 'idleTimer') === 'idle' && !self.countdownOpen ){
-						self._stopTimer();
-						self.countdownOpen = true;
-						self._idle();
-					}
-				});
+				this._setupIdleTimer();
 				
 				// bind continue link
 				this.resume.bind("click", function(e){
@@ -38,9 +27,19 @@
 					self.countdownOpen = false; // stop countdown
 					self._startTimer(); // start up the timer again
 					options.onResume.call( self.warning ); // call the resume callback
+					self._setupIdleTimer();
 				});
 			},
-			
+			_setupIdleTimer: function() {
+			    var self = this;
+				// once the user becomes idle
+			    this.idleTimer = window.setInterval(function() {
+					window.clearInterval(self.idleTimer);
+					self._stopTimer();
+					self.countdownOpen = true;
+					self._idle();
+			    }, options.idleAfter * 1000);
+			},
 			_idle: function(){
 				var self = this,
 					warning = this.warning[0],
